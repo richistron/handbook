@@ -1,0 +1,70 @@
+#! /bin/bash
+
+# $action is equal to param one
+action=$1
+
+# if param is empty the script show the options to the user
+# supported actions
+#     -- install
+#     -- generate
+if [ -z $action ]
+  then
+  echo "Error: You need to send an action!"
+  echo "  Supported Actions:"
+  echo "    * install: it will install the ruby gems that you need"
+  echo "    * generate: generates handook's HTML output"
+  echo "    * server: runs a SimpleHTTPServer"
+  echo ""
+  echo "Example:"
+  echo "      ./handbook generate"
+  exit
+fi
+
+# install "action"
+# install necessary ruby gems via Gemfile
+# if you don't have ruby it will show you the link to the oficial site
+# if you don't have bundler then it will install it via rvm
+if [ $action == "install" ]
+  then
+  if  which ruby &> /dev/null
+  then
+    if !which bundle &> /dev/null
+    then
+      gem install bundler
+    fi
+    bundle install
+  else
+    echo "You need ruby 2.0 or greater for this action"
+    echo "Install ruby and try again"
+    echo "https://www.ruby-lang.org/en/downloads/"
+  fi
+fi
+
+# generate action
+# generates the latest version of the handbook
+# see output/index.html
+if [ $action == "generate" ]
+then
+  if !which asciidoctor &> /dev/null
+    then
+    echo "You need to install handbook's dependencies"
+    echo "try with './handbook install'"
+    exit
+  fi
+  rm -rf output
+  asciidoctor -o output/index.html book/book.asc
+fi
+
+# server action
+# python -m SimpleHTTPServer
+if [ $action == "server" ]
+then
+  if which python &> /dev/null
+  then
+    cd output
+    python -m SimpleHTTPServer
+  else
+    echo "you need python to run this action"
+    echo "http://www.python.org/getit/"
+  fi
+fi
