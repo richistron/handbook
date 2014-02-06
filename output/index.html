@@ -2019,7 +2019,58 @@ in JS-based clients.</p>
 <p>We will design for a fictionally ideal browser that is completely standards-compliant. Obviously, this cannot work in practice. <strong><em>Any other styling used as a fallback must be placed in a separate file.</em></strong> Such a file can be named something like ie_navbar.less to contrast with the ideal navbar.less file. We are doing this because there will come a day when we no longer have to support any number of older browsers, and it must be easy to remove styling for unsupported browsers. Redundant work today, easy of transitition tomorrow.</p>
 </div>
 <div class="paragraph">
-<p><strong><em>We will not be using IE conditional comments at top of any file</em></strong>, as they pollute the &lt;HTML&gt; declaration. IE conditional comments are allowable to include JS files, or at the &lt;BODY&gt; declaration.</p>
+<p><strong><em>We will not be using IE conditional comments at top of any file</em></strong>, as they pollute the &lt;HTML&gt; declaration. IE conditional comments are allowable to include JS files, or at the &lt;BODY&gt; declaration. The current implementation of conditional commenting is:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>&lt;!-- We will treat IE 7 and 8 as one entity --&gt;
+&lt;!--[if IE 7]&gt;&lt;body class="ie ie7 ie7_8"&gt;&lt;![endif]--&gt;
+&lt;!--[if IE 8]&gt;&lt;body class="ie ie8 ie7_8"&gt;&lt;![endif]--&gt;
+&lt;!-- We will treat IE 9 as a close approximation of standards compliancy --&gt;
+&lt;!--[if IE 9]&gt;&lt;body class="ie ie9"&gt;&lt;![endif]--&gt;
+&lt;!-- Because IE10 does not recognize conditional comments anyway. --&gt;
+&lt;!--[if (gt IE 9)|!(IE)]&gt;&lt;!--&gt;&lt;body class=""&gt;&lt;!--&lt;![endif]--&gt;</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CSS to capture only IE7</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.ie7 {}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CSS to capture only IE8</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.ie8 {}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CSS to capture only IE9</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.ie9 {}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CSS to capture both IE7 and IE8 (The majority of fallback CSS should come from this class)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.ie7_8 {}</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>CSS to capture IE7, IE8, and IE9</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>.ie {}</pre>
+</div>
 </div>
 </div>
 <div class="sect3">
@@ -2029,6 +2080,35 @@ in JS-based clients.</p>
 <dt class="hdlist1">Structured Outline</dt>
 <dd>
 <p>Using a combination of appropriate and semantic HTML5 tags and heading hierarchies, <strong><em>the page must maintain structured outline.</em></strong> There will be no untitled sections, and the outlining structure must make semantic sense. See <a href="http://html5doctor.com/outlines/">http://html5doctor.com/outlines/</a> or <a href="http://coding.smashingmagazine.com/2011/08/16/html5-and-the-document-outlining-algorithm/">http://coding.smashingmagazine.com/2011/08/16/html5-and-the-document-outlining-algorithm/</a> for reference.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>The essential test for structured outline is available via <a href="http://gsnedders.html5.org/outliner/">http://gsnedders.html5.org/outliner/</a> It will show a visual representation of the page&#8217;s sectioned content and the names of each part. Sections that have been improperly defined will be listed as <em>"Untitled Section."</em></p>
+</li>
+<li>
+<p>The steps to correct improper sectioning are prioritized as:</p>
+<div class="ulist">
+<ul>
+<li>
+<p>Reduce the amount of HTML nesting and hierarchy</p>
+</li>
+<li>
+<p>Reduce the amount of CSS nesting and hierarchy, and define attributes based on classes and names</p>
+</li>
+<li>
+<p>Determine whether a block element is for actual sectioning or just for visual presentation and alignment. Convert sectioning elements to DIVs, or vice versa.</p>
+</li>
+<li>
+<p>create header elements that are set to display:none; in CSS</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>The metric for properly structured HTML is a much leaner amount of templating needed to generate page features. Likewise, the amount of CSS needed to style the features will be significantly reduced as well.</p>
+</li>
+</ul>
+</div>
 </dd>
 <dt class="hdlist1">Respect ARIA Roles</dt>
 <dd>
@@ -2085,7 +2165,7 @@ in JS-based clients.</p>
 </dd>
 <dt class="hdlist1">Sizing</dt>
 <dd>
-<p>With the exception of global resets for font sizing and defining breakpoints, <strong><em>do not define anything using pixels.</em></strong> Use EMs or REMs, depending on context or relevancy. Be wary of REMS as even though they are very useful, the do not have full browser support.</p>
+<p>With the exception of global resets for font sizing, legacy browser support, and defining breakpoints, <strong><em>do not define anything using pixels.</em></strong> Use EMs or REMs, depending on context or relevancy.</p>
 </dd>
 </dl>
 </div>
@@ -2094,6 +2174,71 @@ in JS-based clients.</p>
 <h4 id="_v_device_agnostic_and_responsive_design">V. Device-Agnostic and Responsive Design</h4>
 <div class="paragraph">
 <p>The styling for all pages and applications will assume that we do not have control over the browser, viewport, or device being used. Breakpoints must be defined such that there is coherent presentation and behavior regardless of screen size or available user interaction (e.g. touch screens versus mouse control).</p>
+</div>
+<div class="paragraph">
+<p><strong>Responsiveness is going to use breakpoints that go from smallest to largest,</strong> not largest to smallest. The definitions are as follows:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Browser widths <strong>below 768 pixels</strong>: currently out of scope</p>
+</li>
+<li>
+<p>Browser widths at <strong>768 to 991 pixels</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Covers screen resolutions of 768 and 960 (tablet space)</p>
+</li>
+<li>
+<p>Content width fixed at 768: 12 columns of 64 pixels</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Browser widths at <strong>992 to 1199 pixels</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Covers screen resolutions of 1014 and 1152 (landscape tablets and small monitors)</p>
+</li>
+<li>
+<p>Content width fixed at 960 pixels: 12 columns of 80 pixels</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Browser widths at <strong>1200 to 1329 pixels</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Covers screen resolution of 1280 (standard desktop monitors)</p>
+</li>
+<li>
+<p>Content width fixed at 1152 pixels: 12 columns of 96 pixels</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Browser widths at <strong>1300 pixels and higher</strong></p>
+<div class="ulist">
+<ul>
+<li>
+<p>Covers screen resolutions of 1366, 1440, and up (standard laptop screens, Macbook screens, and large monitors)</p>
+</li>
+<li>
+<p>Content width fixed at 1296 pixels: 12 columns of 108 pixels</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Consequently, the width of the content of the site will never exceed 1296 pixels.</p>
 </div>
 </div>
 </div>
